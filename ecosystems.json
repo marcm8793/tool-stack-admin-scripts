@@ -1,0 +1,18 @@
+[
+  {
+    "ecosystem_id": "js-ts",
+    "name": "JavaScript/TypeScript"
+  },
+  {
+    "ecosystem_id": "universal",
+    "name": "Universal"
+  },
+  {
+    "ecosystem_id": "python",
+    "name": "Python"
+  },
+  {
+    "ecosystem_id": "tailwind css",
+    "name": "Tailwind CSS"
+  }
+]
