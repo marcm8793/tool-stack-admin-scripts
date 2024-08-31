@@ -2,7 +2,7 @@
   "projects": {
     "default": "tool-stack",
     "dev": "tool-stack",
-    "prod": "ToolStack-prod"
+    "prod": "toolstack-prod"
   },
   "targets": {},
   "etags": {
