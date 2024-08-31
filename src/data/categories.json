@@ -1,0 +1,114 @@
+[
+  {
+    "category_id": "analytics",
+    "name": "Analytics"
+  },
+  {
+    "category_id": "api-client",
+    "name": "Api Client"
+  },
+  {
+    "category_id": "auth",
+    "name": "Authentification"
+  },
+  {
+    "category_id": "cms",
+    "name": "CMS"
+  },
+  {
+    "category_id": "data-visualization",
+    "name": "Data Visualization"
+  },
+  {
+    "category_id": "documentation",
+    "name": "Documentation"
+  },
+  {
+    "category_id": "domain-management",
+    "name": "Domain Management"
+  },
+  {
+    "category_id": "domains-registrar",
+    "name": "Domains registar"
+  },
+  {
+    "category_id": "drag-and-drop",
+    "name": "Drag-and-Drop"
+  },
+  {
+    "category_id": "emoji",
+    "name": "Emoji"
+  },
+  {
+    "category_id": "icons",
+    "name": "Icons"
+  },
+  {
+    "category_id": "forms",
+    "name": "Forms"
+  },
+  {
+    "category_id": "git-control",
+    "name": "Git Control"
+  },
+  {
+    "category_id": "ide",
+    "name": "IDE"
+  },
+  {
+    "category_id": "low-code",
+    "name": "Low-code"
+  },
+  {
+    "category_id": "mapping-services",
+    "name": "Mapping Services"
+  },
+  {
+    "category_id": "ocr",
+    "name": "OCR"
+  },
+  {
+    "category_id": "paas-baas",
+    "name": "Paas/Baas"
+  },
+  {
+    "category_id": "payments",
+    "name": "Payments"
+  },
+  {
+    "category_id": "pdf",
+    "name": "PDF"
+  },
+  {
+    "category_id": "scraping-&-parsing",
+    "name": "Scraping & Parsing"
+  },
+  {
+    "category_id": "terminal",
+    "name": "Terminal"
+  },
+  {
+    "category_id": "tooltip",
+    "name": "Tooltip"
+  },
+  {
+    "category_id": "ui-animations",
+    "name": "UI Animations"
+  },
+  {
+    "category_id": "ui-illustrations",
+    "name": "UI illustrations"
+  },
+  {
+    "category_id": "ui-library",
+    "name": "UI Library"
+  },
+  {
+    "category_id": "wysiwyg-editor",
+    "name": "WYSIWYG Editor"
+  },
+  {
+    "category_id": "tagging",
+    "name": "Tagging"
+  }
+]

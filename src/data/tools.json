@@ -1,0 +1,14 @@
+[
+  {
+    "tool_id": "stack",
+    "name": "Stack",
+    "description": "StackAuth is a service providing authentication solutions tailored for modern web applications. It offers features like user authentication, session management, password recovery, and multi-factor authentication. StackAuth emphasizes security, scalability, and ease of integration, making it a suitable choice for developers looking to implement robust and secure authentication systems in their projects. It's an open-source Clerk/Auth0 alternative.",
+    "category_id": "auth",
+    "ecosystem_id": "js-ts",
+    "github_link": "https://github.com/stack-auth/stack",
+    "github_stars": 2700,
+    "logo_url": "https://i.ibb.co/PjFv4Nr/161534807-s-48-v-4.png",
+    "website_url": "https://stack-auth.com/",
+    "badges": ["Session Management", "Security", "Multi-factor Authentication"]
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "tool-stack",
+    "dev": "tool-stack",
+    "prod": "ToolStack-prod"
+  },
+  "targets": {},
+  "etags": {
+    "tool-stack": {
+      "extensionInstances": {}
+    }
+  },
+  "dataconnectEmulatorConfig": {}
+}

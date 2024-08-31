@@ -1,3 +1,7 @@
 node_modules
 .env
-serviceAccountKey.json
+pkFirebase-prod.json
+pkFirebase-dev.json
+*.log
+lib
+*.local

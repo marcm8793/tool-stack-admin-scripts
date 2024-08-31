@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // Initialize Firebase Admin SDK
-const serviceAccount = require("./serviceAccountKey.json");
+const serviceAccount = require("../serviceAccountKey.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: process.env.FIREBASE_STORAGE_BUCKET, // Bucket name
@@ -98,24 +98,34 @@ async function validateReferences(tools: Tool[]): Promise<boolean> {
     )
     .get();
 
-  if (categoryDocs.size !== categoryIds.size) {
-    console.error("Some category IDs do not exist in the database");
-    return false;
+  let isValid = true;
+
+  const existingCategoryIds = new Set(categoryDocs.docs.map((doc) => doc.id));
+  const missingCategoryIds = Array.from(categoryIds).filter(
+    (id) => !existingCategoryIds.has(id)
+  );
+  if (missingCategoryIds.length > 0) {
+    console.error("Missing category IDs:", missingCategoryIds);
+    isValid = false;
   }
 
-  if (ecosystemDocs.size !== ecosystemIds.size) {
-    console.error("Some ecosystem IDs do not exist in the database");
-    return false;
+  const existingEcosystemIds = new Set(ecosystemDocs.docs.map((doc) => doc.id));
+  const missingEcosystemIds = Array.from(ecosystemIds).filter(
+    (id) => !existingEcosystemIds.has(id)
+  );
+  if (missingEcosystemIds.length > 0) {
+    console.error("Missing ecosystem IDs:", missingEcosystemIds);
+    isValid = false;
   }
 
-  return true;
+  return isValid;
 }
 
 // Main function to populate the database with tools
 async function populateTools() {
   try {
     // Read tools from JSON file
-    const toolsData: string = fs.readFileSync("./tools.json", "utf-8");
+    const toolsData: string = fs.readFileSync("./data//tools.json", "utf-8");
     const tools: Tool[] = JSON.parse(toolsData);
 
     // Validate category and ecosystem references

@@ -2,7 +2,7 @@ import * as admin from "firebase-admin";
 import * as fs from "fs";
 
 // Initialize Firebase Admin SDK
-const serviceAccount = require("./serviceAccountKey.json");
+const serviceAccount = require("../serviceAccountKey.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
@@ -36,20 +36,40 @@ async function addData<T extends { [key: string]: string }>(
   await batch.commit();
   console.log(`Added ${data.length} items to ${collectionName}`);
 }
+// Here's how you could modify the addData function to check for existence
+// and only add new documents: (but slow)
+// async function addData<T extends { [key: string]: string }>(
+//   collectionName: string,
+//   data: T[],
+//   idField: string
+// ) {
+//   const batch = db.batch();
+//   for (const item of data) {
+//     const docRef = db.collection(collectionName).doc(item[idField]);
+//     const doc = await docRef.get();
+//     if (!doc.exists) {
+//       batch.set(docRef, item);
+//     } else {
+//       console.log(`Document ${item[idField]} already exists in ${collectionName}. Skipping.`);
+//     }
+//   }
+//   await batch.commit();
+//   console.log(`Added new items to ${collectionName}`);
+// }
 
 // Main function to populate the database with categories and ecosystems
 async function populateDatabase() {
   try {
     // Read categories from JSON file
     const categoriesData: string = fs.readFileSync(
-      "./categories.json",
+      "./data/categories.json",
       "utf-8"
     );
     const categories: Category[] = JSON.parse(categoriesData);
 
     // Read ecosystems from JSON file
     const ecosystemsData: string = fs.readFileSync(
-      "./ecosystems.json",
+      "./data/ecosystems.json",
       "utf-8"
     );
     const ecosystems: Ecosystem[] = JSON.parse(ecosystemsData);
