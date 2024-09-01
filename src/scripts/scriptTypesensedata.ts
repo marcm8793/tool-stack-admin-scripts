@@ -1,10 +1,13 @@
 import * as admin from "firebase-admin";
 import Typesense from "typesense";
 import * as functions from "firebase-functions";
+import type { CollectionCreateSchema } from "typesense/lib/Typesense/Collections";
+import dotenv from "dotenv";
 
+dotenv.config();
 // Initialize Firebase Admin
 // Make sure you have set up your service account key
-const serviceAccount = require("./serviceAccountKey.json");
+const serviceAccount = require("../../pkFirebase-prod.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
@@ -14,15 +17,53 @@ const db = admin.firestore();
 const typesenseClient = new Typesense.Client({
   nodes: [
     {
-      host: functions.config().typesense.host,
-      port: parseInt(functions.config().typesense.port, 10),
-      protocol: functions.config().typesense.protocol,
+      host: process.env.TYPESENSE_PROD_HOST!,
+      port: parseInt(process.env.TYPESENSE_PROD_PORT!),
+      protocol: process.env.TYPESENSE_PROD_PROTOCOL!,
     },
   ],
-  apiKey: functions.config().typesense.apikey,
+  apiKey: process.env.TYPESENSE_PROD_API_KEY!,
   connectionTimeoutSeconds: 2,
 });
+
+const schema: CollectionCreateSchema = {
+  name: "dev_tools",
+  fields: [
+    { name: "name", type: "string" },
+    { name: "description", type: "string" },
+    { name: "category", type: "string" },
+    { name: "ecosystem", type: "string" },
+    { name: "badges", type: "string[]" },
+    { name: "github_link", type: "string" },
+    { name: "github_stars", type: "int32" },
+    { name: "logo_url", type: "string" },
+    { name: "website_url", type: "string" },
+    { name: "like_count", type: "int32" },
+  ],
+};
+
+async function createCollectionIfNotExists() {
+  try {
+    await typesenseClient.collections("dev_tools").retrieve();
+    console.log("Collection 'dev_tools' already exists");
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      "httpStatus" in error &&
+      error.httpStatus === 404
+    ) {
+      await typesenseClient.collections().create(schema);
+      console.log("Created 'dev_tools' collection");
+    } else {
+      console.error("Unexpected error:", error);
+      throw error;
+    }
+  }
+}
+
 async function syncDataToTypesense() {
+  await createCollectionIfNotExists();
+
   const toolsRef = db.collection("tools");
   const snapshot = await toolsRef.get();
 
@@ -38,8 +79,8 @@ async function syncDataToTypesense() {
       id: doc.id,
       name: data.name,
       description: data.description,
-      category: categoryDoc.data().name, // Assuming you want to store the category name
-      ecosystem: ecosystemDoc.data().name, // Assuming you want to store the ecosystem name
+      category: categoryDoc.data().name,
+      ecosystem: ecosystemDoc.data().name,
       badges: data.badges,
       github_link: data.github_link,
       github_stars: data.github_stars,

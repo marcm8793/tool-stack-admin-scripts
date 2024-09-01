@@ -11,6 +11,8 @@ export const syncToolsToTypesense = functions.firestore
     console.log("Function triggered for document:", context.params.toolId);
     const toolData = change.after.exists ? change.after.data() : null;
     const toolId = context.params.toolId;
+    console.log("Tool data:", toolData);
+    console.log("Tool ID:", toolId);
 
     if (!toolData) {
       // Tool was deleted, remove from Typesense
@@ -30,10 +32,12 @@ export const syncToolsToTypesense = functions.firestore
       // Fetch category data
       const categoryDoc = await toolData.category.get();
       const categoryData = categoryDoc.data();
+      console.log("Category data:", categoryData);
 
       // Fetch ecosystem data
       const ecosystemDoc = await toolData.ecosystem.get();
       const ecosystemData = ecosystemDoc.data();
+      console.log("Ecosystem data:", ecosystemData);
 
       // Prepare the object to be indexed in Typesense
       const objectToIndex = {
