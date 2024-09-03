@@ -6,8 +6,12 @@ import { typesenseClient } from "../config/typesense";
 import { sendTelegramMessage } from "../config/telegram";
 import { TypesenseError } from "typesense/lib/Typesense/Errors";
 
-export const fullSyncToolsToTypesense = functions.https.onRequest(
-  async (request, response) => {
+export const fullSyncToolsToTypesense = functions
+  .runWith({
+    timeoutSeconds: 540, // Firebase-specific configuration
+    memory: "1GB",
+  })
+  .https.onRequest(async (request, response) => {
     const logMessages = [];
     let totalTools = 0;
     let updatedTools = 0;
@@ -105,5 +109,4 @@ ${syncStatus}
       response.status(500).send("Error during full sync");
       logMessages.push(`Error during full sync: ${error}`);
     }
-  }
-);
+  });
