@@ -34,8 +34,8 @@ const schema: CollectionCreateSchema = {
     { name: "category", type: "string" },
     { name: "ecosystem", type: "string" },
     { name: "badges", type: "string[]" },
-    { name: "github_link", type: "string" },
-    { name: "github_stars", type: "int32" },
+    { name: "github_link", type: "string", optional: true },
+    { name: "github_stars", type: "int32", optional: true },
     { name: "logo_url", type: "string" },
     { name: "website_url", type: "string" },
     { name: "like_count", type: "int32" },
@@ -44,8 +44,10 @@ const schema: CollectionCreateSchema = {
 
 async function createCollectionIfNotExists() {
   try {
-    await typesenseClient.collections("dev_tools").retrieve();
-    console.log("Collection 'dev_tools' already exists");
+    // await typesenseClient.collections("dev_tools").retrieve();
+    // console.log("Collection 'dev_tools' already exists");
+    await typesenseClient.collections("dev_tools").delete();
+    console.log("Deleted existing 'dev_tools' collection");
   } catch (error) {
     if (
       error instanceof Error &&
@@ -66,6 +68,7 @@ async function syncDataToTypesense() {
 
   const toolsRef = db.collection("tools");
   const snapshot = await toolsRef.get();
+  let syncedCount = 0;
 
   for (const doc of snapshot.docs) {
     const data = doc.data();
@@ -95,6 +98,8 @@ async function syncDataToTypesense() {
         .documents()
         .upsert(typesenseDoc);
       console.log(`Synced document ${doc.id}`);
+      syncedCount++;
+      console.log(`Synced ${syncedCount} documents`);
     } catch (error) {
       console.error(`Error syncing document ${doc.id}:`, error);
     }
