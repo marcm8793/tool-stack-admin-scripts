@@ -3,7 +3,7 @@ import { UserRecord } from "firebase-admin/auth";
 const admin = require("firebase-admin");
 
 // Initialize Firebase Admin SDK
-const serviceAccount = require("../../pkFirebase-prod.json");
+const serviceAccount = require("../../pkFirebase-dev.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
@@ -62,4 +62,5 @@ async function setupFirstAdmin(uid: string) {
 
 // Usage:
 // Replace 'first-admin-uid' with the actual UID of the user you want to make the first admin
-setupFirstAdmin("idoftheusertobeadmin");
+// READ THIS CAREFULLY: CHANGE THE ID BELOW TO THE UID OF THE USER YOU WANT TO MAKE THE FIRST ADMIN
+setupFirstAdmin("IDOFUSER");
