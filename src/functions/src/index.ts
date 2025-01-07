@@ -23,6 +23,12 @@ import * as admin from "firebase-admin";
 import { syncToolsToTypesense } from "./triggers/syncToolsToTypesense";
 import { fullSyncToolsToTypesense } from "./triggers/fullSyncToolsToTypesense";
 import { triggerDailySync } from "./triggers/triggerDailySync";
+import { generateChatResponse } from "./chatbot";
 
 admin.initializeApp();
-export { syncToolsToTypesense, fullSyncToolsToTypesense, triggerDailySync };
+export {
+  syncToolsToTypesense,
+  fullSyncToolsToTypesense,
+  triggerDailySync,
+  generateChatResponse,
+};
