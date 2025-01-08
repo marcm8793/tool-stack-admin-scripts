@@ -1,17 +1,15 @@
+/* eslint-disable operator-linebreak */
 /* eslint-disable object-curly-spacing */
 import * as functions from "firebase-functions";
-import * as admin from "firebase-admin";
 import OpenAI from "openai";
+import { pineconeClient } from "./config/pinecone";
 
 const apiKey = functions.config().openai.key;
-
-const openai = new OpenAI({
-  apiKey,
-});
+const openai = new OpenAI({ apiKey });
+const INDEX_NAME = "toolstack-tools";
 
 export const generateChatResponse = functions.https.onCall(
   async (data, context) => {
-    // Ensure user is authenticated
     if (!context.auth) {
       throw new functions.https.HttpsError(
         "unauthenticated",
@@ -19,26 +17,38 @@ export const generateChatResponse = functions.https.onCall(
       );
     }
 
-    const { messages, toolQuery } = data;
+    const { messages, query } = data;
 
     try {
-      // Query Firestore for relevant tools
-      const toolsRef = admin.firestore().collection("tools");
-      const toolsSnapshot = await toolsRef
-        .where("description", ">=", toolQuery.toLowerCase())
-        .where("description", "<=", toolQuery.toLowerCase() + "\uf8ff")
-        .limit(5)
-        .get();
+      // Generate embedding for the query
+      const queryEmbedding = await openai.embeddings.create({
+        model: "text-embedding-3-small",
+        input: query,
+      });
 
-      // Prepare context from tools
-      const context = toolsSnapshot.docs
-        .map((doc) => {
-          const tool = doc.data();
-          return `Tool: ${tool.name}\nDescription: ${
-            tool.description
-          }\nCategory: ${tool.category?.name || "N/A"}\n`;
+      // Search Pinecone for relevant tools
+      const index = pineconeClient.index(INDEX_NAME);
+      const searchResults = await index.query({
+        vector: queryEmbedding.data[0].embedding,
+        topK: 5,
+        includeMetadata: true,
+      });
+
+      // Prepare context from relevant tools
+      const context = searchResults.matches
+        .map((match) => {
+          const tool = match.metadata;
+          if (!tool) return "";
+          return `Tool: ${tool.name}
+              Description: ${tool.description}
+              Category: ${tool.category}
+              Ecosystem: ${tool.ecosystem}    ${
+            tool.badges && Array.isArray(tool.badges)
+              ? `Tags: ${tool.badges.join(", ")}`
+              : ""
+          }`;
         })
-        .join("\n");
+        .join("\n\n");
 
       // Generate OpenAI response
       const response = await openai.chat.completions.create({
@@ -47,19 +57,20 @@ export const generateChatResponse = functions.https.onCall(
           {
             role: "system",
             content: `You are a helpful assistant for ToolStack, a platform for
-                      discovering developer tools.
-          Use the following context about tools to answer questions:
-          ${context}
+                     discovering developer tools.
+            Use the following context about tools to answer questions:
+            ${context}
 
-          If you don't find relevant information in the context, you can provide
-          general guidance about developer tools.
-          Always be friendly and concise in your responses.`,
+            If you don't find relevant information in the context, you can
+            provide general guidance about developer tools.
+            Always be friendly and concise in your responses.`,
           },
           ...messages,
         ],
         temperature: 0.7,
         max_tokens: 500,
       });
+
       return {
         message: response.choices[0].message.content,
       };
