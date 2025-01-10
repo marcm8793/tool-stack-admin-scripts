@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 /* eslint-disable operator-linebreak */
 /* eslint-disable object-curly-spacing */
 import * as functions from "firebase-functions";
@@ -6,7 +7,7 @@ import { pineconeClient } from "./config/pinecone";
 
 const apiKey = functions.config().openai.key;
 const openai = new OpenAI({ apiKey });
-const INDEX_NAME = "toolstack-tools";
+const INDEX_NAME = "toolstack-tools-dev";
 
 export const generateChatResponse = functions.https.onCall(
   async (data, context) => {
@@ -17,13 +18,21 @@ export const generateChatResponse = functions.https.onCall(
       );
     }
 
-    const { messages, query } = data;
+    // Input validation
+    const { messages, toolQuery } = data;
+    if (!messages || !toolQuery) {
+      throw new functions.https.HttpsError(
+        "invalid-argument",
+        "Messages and toolQuery are required"
+      );
+    }
 
     try {
       // Generate embedding for the query
       const queryEmbedding = await openai.embeddings.create({
         model: "text-embedding-3-small",
-        input: query,
+        input: toolQuery,
+        dimensions: 1536,
       });
 
       // Search Pinecone for relevant tools

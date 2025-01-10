@@ -8,7 +8,7 @@ import { TypesenseError } from "typesense/lib/Typesense/Errors";
 
 export const fullSyncToolsToTypesense = functions
   .runWith({
-    timeoutSeconds: 540, // Firebase-specific configuration
+    timeoutSeconds: 540,
     memory: "1GB",
   })
   .https.onRequest(async (request, response) => {
@@ -18,63 +18,88 @@ export const fullSyncToolsToTypesense = functions
     let addedTools = 0;
 
     try {
-      const toolsSnapshot = await admin.firestore().collection("tools").get();
-      logMessages.push(`Starting full sync of ${toolsSnapshot.size} tools.`);
-      totalTools = toolsSnapshot.size;
+      // Get all tools in batches
+      const batchSize = 100;
+      const toolsQuery = admin.firestore().collection("tools");
+      const batches = [];
+      let lastDoc = null;
 
-      for (const doc of toolsSnapshot.docs) {
-        const toolData = doc.data();
-        const toolId = doc.id;
-
-        // Fetch category data
-        const categoryDoc = await toolData.category.get();
-        const categoryData = categoryDoc.data();
-
-        // Fetch ecosystem data
-        const ecosystemDoc = await toolData.ecosystem.get();
-        const ecosystemData = ecosystemDoc.data();
-
-        const objectToIndex = {
-          id: toolId,
-          name: toolData.name,
-          description: toolData.description,
-          category: categoryData.name,
-          ecosystem: ecosystemData.name,
-          badges: toolData.badges,
-          github_link: toolData.github_link,
-          github_stars: toolData.github_stars,
-          logo_url: toolData.logo_url,
-          website_url: toolData.website_url,
-          like_count: toolData.like_count || 0,
-        };
-
-        // Check if the tool exists in Typesense
-        try {
-          const existingTool = await typesenseClient
-            .collections("dev_tools")
-            .documents(toolId)
-            .retrieve();
-
-          // Compare existing data with new data
-          if (JSON.stringify(existingTool) !== JSON.stringify(objectToIndex)) {
-            await typesenseClient
-              .collections("dev_tools")
-              .documents(toolId)
-              .update(objectToIndex);
-            updatedTools++;
-          }
-        } catch (error) {
-          // If the tool doesn't exist in Typesense, add it
-          if (error instanceof TypesenseError && error.httpStatus === 404) {
-            await typesenseClient
-              .collections("dev_tools")
-              .documents()
-              .create(objectToIndex);
-            addedTools++;
-          } else {
-            throw error;
-          }
+      do {
+        let query = toolsQuery.limit(batchSize);
+        if (lastDoc) {
+          query = query.startAfter(lastDoc);
         }
+        const snapshot = await query.get();
+        if (snapshot.empty) break;
+
+        lastDoc = snapshot.docs[snapshot.docs.length - 1];
+        batches.push(snapshot.docs);
+        totalTools += snapshot.size;
+      } while (lastDoc);
+
+      logMessages.push(`Starting full sync of ${totalTools} tools.`);
+
+      // Process tools in parallel batches
+      for (const batch of batches) {
+        await Promise.all(
+          batch.map(async (doc) => {
+            const toolData = doc.data();
+            const toolId = doc.id;
+
+            // Fetch category and ecosystem data in parallel
+            const [categoryDoc, ecosystemDoc] = await Promise.all([
+              toolData.category.get(),
+              toolData.ecosystem.get(),
+            ]);
+
+            const categoryData = categoryDoc.data();
+            const ecosystemData = ecosystemDoc.data();
+
+            const objectToIndex = {
+              id: toolId,
+              name: toolData.name,
+              description: toolData.description,
+              category: categoryData.name,
+              ecosystem: ecosystemData.name,
+              badges: toolData.badges,
+              github_link: toolData.github_link,
+              github_stars: toolData.github_stars,
+              logo_url: toolData.logo_url,
+              website_url: toolData.website_url,
+              like_count: toolData.like_count || 0,
+            };
+
+            // Check if the tool exists in Typesense
+            try {
+              const existingTool = await typesenseClient
+                .collections("dev_tools")
+                .documents(toolId)
+                .retrieve();
+
+              // Compare existing data with new data
+              if (
+                JSON.stringify(existingTool) !== JSON.stringify(objectToIndex)
+              ) {
+                await typesenseClient
+                  .collections("dev_tools")
+                  .documents(toolId)
+                  .update(objectToIndex);
+                updatedTools++;
+              }
+            } catch (error) {
+              // If the tool doesn't exist in Typesense, add it
+              if (error instanceof TypesenseError && error.httpStatus === 404) {
+                await typesenseClient
+                  .collections("dev_tools")
+                  .documents()
+                  .create(objectToIndex);
+                addedTools++;
+              } else {
+                throw error;
+              }
+            }
+          })
+        );
       }
 
       // Verify the number of tools in Typesense

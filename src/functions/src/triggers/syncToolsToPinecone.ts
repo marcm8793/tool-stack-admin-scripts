@@ -7,7 +7,7 @@ const openai = new OpenAI({
   apiKey: functions.config().openai.key,
 });
 
-const INDEX_NAME = "toolstack-tools";
+const INDEX_NAME = "toolstack-tools-dev";
 
 // eslint-disable-next-line require-jsdoc
 async function getEmbedding(text: string) {
