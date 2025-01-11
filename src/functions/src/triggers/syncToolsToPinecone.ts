@@ -1,3 +1,4 @@
+/* eslint-disable operator-linebreak */
 /* eslint-disable object-curly-spacing */
 import * as functions from "firebase-functions";
 import { pineconeClient } from "../config/pinecone";
@@ -7,7 +8,9 @@ const openai = new OpenAI({
   apiKey: functions.config().openai.key,
 });
 
-const INDEX_NAME = "toolstack-tools-dev";
+const INDEX_NAME = functions.config().environment.prod
+  ? "toolstack-tools-prod"
+  : "toolstack-tools-dev";
 
 // eslint-disable-next-line require-jsdoc
 async function getEmbedding(text: string) {

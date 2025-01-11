@@ -7,7 +7,9 @@ import { pineconeClient } from "./config/pinecone";
 
 const apiKey = functions.config().openai.key;
 const openai = new OpenAI({ apiKey });
-const INDEX_NAME = "toolstack-tools-dev";
+const INDEX_NAME = functions.config().environment.prod
+  ? "toolstack-tools-prod"
+  : "toolstack-tools-dev";
 
 export const generateChatResponse = functions.https.onCall(
   async (data, context) => {
