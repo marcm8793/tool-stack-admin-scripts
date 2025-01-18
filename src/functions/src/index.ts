@@ -24,6 +24,10 @@ import { syncToolsToTypesense } from "./triggers/syncToolsToTypesense";
 import { fullSyncToolsToTypesense } from "./triggers/fullSyncToolsToTypesense";
 import { triggerDailySync } from "./triggers/triggerDailySync";
 import { generateChatResponse } from "./chatbot";
+import {
+  fullSyncToolsToPinecone,
+  syncToolsToPinecone,
+} from "./triggers/syncToolsToPinecone";
 
 admin.initializeApp();
 export {
@@ -31,4 +35,6 @@ export {
   fullSyncToolsToTypesense,
   triggerDailySync,
   generateChatResponse,
+  fullSyncToolsToPinecone,
+  syncToolsToPinecone,
 };

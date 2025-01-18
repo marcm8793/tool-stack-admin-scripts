@@ -8,13 +8,20 @@ export const triggerDailySync = functions.pubsub
     try {
       const region = functions.config().project.region;
       const projectId = functions.config().project.id;
-      console.log("Region:", region);
-      console.log("Project ID:", projectId);
-      const fullSyncUrl = `https://${region}-${projectId}.cloudfunctions.net/fullSyncToolsToTypesense`;
-      console.log("Full sync URL:", fullSyncUrl);
-      const response = await fetch(fullSyncUrl);
-      console.log("Fetch response status:", response.status);
-      console.log("Fetch response text:", await response.text());
+
+      // Call both sync endpoints
+      const syncUrls = [
+        `https://${region}-${projectId}.cloudfunctions.net/fullSyncToolsToTypesense`,
+        `https://${region}-${projectId}.cloudfunctions.net/fullSyncToolsToPinecone`,
+      ];
+
+      for (const url of syncUrls) {
+        console.log(`Calling sync URL: ${url}`);
+        const response = await fetch(url);
+        console.log(`Response status: ${response.status}`);
+        console.log(`Response text: ${await response.text()}`);
+      }
+
       return null;
     } catch (error) {
       console.error("Error in triggerDailySync:", error);

@@ -3,7 +3,7 @@ import { Pinecone } from "@pinecone-database/pinecone";
 import OpenAI from "openai";
 import dotenv from "dotenv";
 
-dotenv.config();
+dotenv.config({ path: "../../.env" });
 
 const serviceAccount = require("../../pkFirebase-dev.json");
 admin.initializeApp({
@@ -18,7 +18,10 @@ const pinecone = new Pinecone({
   apiKey: process.env.PINECONE_API_KEY!,
 });
 
-const INDEX_NAME = "toolstack-tools-dev";
+const INDEX_NAME =
+  process.env.ENVIRONMENT === "prod"
+    ? "toolstack-tools-prod"
+    : "toolstack-tools-dev";
 
 async function createIndexIfNotExists() {
   try {
