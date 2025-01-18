@@ -28,3 +28,9 @@ prod-env:
 ```bash
 firebase functions:config:set environment.prod=true
 ```
+
+Deploy functions:
+
+```bash
+firebase deploy --only functions
+```

@@ -31,6 +31,7 @@ export const syncToolsToPinecone = functions.firestore
     const toolData = change.after.exists ? change.after.data() : null;
     const toolId = context.params.toolId;
     const index = pineconeClient.index(INDEX_NAME);
+    let countTool = 0;
 
     try {
       if (!toolData) {
@@ -75,7 +76,8 @@ export const syncToolsToPinecone = functions.firestore
         },
       ]);
 
-      console.log(`Successfully synced tool ${toolId} to Pinecone`);
+      countTool++;
+      console.log(`Successfully synced tool ${countTool} to Pinecone`);
     } catch (error) {
       console.error(`Error syncing tool ${toolId} to Pinecone:`, error);
     }
