@@ -163,7 +163,7 @@ export const fullSyncToolsToPinecone = functions
             ]);
 
             successCount++;
-            return `✅ Successfully synced tool: ${toolData.name}`;
+            return `✅ Successfully synced tool: ${successCount}/${totalTools}`;
           } catch (error) {
             errorCount++;
             console.error(`Error syncing tool ${doc.id}:`, error);
