@@ -163,7 +163,7 @@ export const fullSyncToolsToPinecone = functions
             ]);
 
             successCount++;
-            return `✅ Successfully synced tool: ${successCount}/${totalTools}`;
+            return null;
           } catch (error) {
             errorCount++;
             console.error(`Error syncing tool ${doc.id}:`, error);
@@ -173,7 +173,9 @@ export const fullSyncToolsToPinecone = functions
 
         // Wait for all tools in the batch to complete
         const batchResults = await Promise.all(batchPromises);
-        logMessages.push(...batchResults);
+        logMessages.push(
+          ...batchResults.filter((result): result is string => result !== null)
+        );
 
         // Send intermediate progress update
         if (logMessages.length >= 100) {
